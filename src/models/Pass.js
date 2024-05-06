@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) =>
             type: DataTypes.STRING,
             allowNull: false
         },
+        iterations: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         creationDate: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW

@@ -1,4 +1,4 @@
-const AccountStateModel = require('../models/AccountState');
+const {AccountStateModel} = require('../models/AccountState');
 const BaseModel = require('../models/Base');
 const DogModel = require('../models/Dog');
 const FriendRequestModel = require('../models/FriendRequest');
@@ -9,6 +9,7 @@ const PassModel = require('../models/Pass');
 const PlayerModel = require('../models/Player');
 const TokenModel = require('../models/Token');
 const UserModel = require('../models/User');
+const VerificationModel = require('../models/VerificationCode');
 const {DataTypes, Sequelize} = require('sequelize');
 
 
@@ -41,6 +42,7 @@ const Pass = PassModel(sequelize, DataTypes);
 const Player = PlayerModel(sequelize, DataTypes);
 const Token = TokenModel(sequelize, DataTypes);
 const User = UserModel(sequelize, DataTypes);
+const VerificationCode = VerificationModel(sequelize, DataTypes);
 
 
 
@@ -48,8 +50,11 @@ const User = UserModel(sequelize, DataTypes);
 User.hasMany(Player, {foreignKey: 'userId'});
 Player.belongsTo(User, {foreignKey: 'userId'});
 
-User.belongsTo(AccountState, {foreignKey: 'accountStateId'});
+User.hasOne(VerificationCode, {foreignKey: 'userId'});
+VerificationCode.belongsTo(User, {foreignKey: 'userId'});
+
 AccountState.hasOne(User, {foreignKey: 'accountStateId'});
+User.belongsTo(AccountState, {foreignKey: 'accountStateId'});
 
 User.hasMany(Pass, {foreignKey: 'userId'});
 Pass.belongsTo(User, {foreignKey: 'userId'});
@@ -65,10 +70,10 @@ User.hasOne(FriendRequest, {foreignKey: 'receiverId'});
 User.hasMany(Base, {foreignKey: 'userId'});
 Base.belongsTo(User, {foreignKey: 'userId'});
 
-GameEnv.hasMany(Player, {foreignKey: 'player1Id'});
-Player.belongsTo(GameEnv, {foreignKey: 'player1Id'});
-GameEnv.hasMany(Player, {foreignKey: 'player2Id'});
-Player.belongsTo(GameEnv, {foreignKey: 'player2Id'});
+GameEnv.belongsTo(Player, {foreignKey: 'player1Id'});
+Player.hasMany(GameEnv, {foreignKey: 'player1Id'});
+GameEnv.belongsTo(Player, {foreignKey: 'player2Id'});
+Player.hasMany(GameEnv, {foreignKey: 'player2Id'});
 
 Player.belongsToMany(Dog, {through: "litter", foreignKey: 'playerId'});
 Dog.belongsToMany(Player, {through: "litter", foreignKey: 'dogId'});
@@ -77,6 +82,7 @@ Pack.hasOne(Litter , {foreignKey: 'litterId'});
 Litter.belongsTo(Pack, {foreignKey: 'litterId'});
 
 
+sequelize.sync({ alter: true, force: false });
 
 
 

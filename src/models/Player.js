@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) =>
         },
         currentLocation: {
             type: DataTypes.GEOGRAPHY('POINT'),
-            allowNull: false
+            allowNull: true
         },
         base: {
             type: DataTypes.GEOGRAPHY('POINT'),
@@ -20,6 +20,6 @@ module.exports = (sequelize, DataTypes) =>
         },
         lastLogin: {
             type: DataTypes.DATE,
-            allowNull: false
+            allowNull: true
         },
     });
