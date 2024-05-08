@@ -1,7 +1,7 @@
 const {sequelize} = require("../conf/DB");
 const {sendGrid} = require("../conf/SendGrid");
 const {normalizeEmail} = require("validator");
-const {makeid} = require("../utils/TokenSecurity");
+const {makeId} = require("../utils/TokenSecurity");
 const {API_URL} = require("../app");
 const crypto = require('crypto');
 const {pbkdf2Sync: pbkdf2} = require("pbkdf2");
