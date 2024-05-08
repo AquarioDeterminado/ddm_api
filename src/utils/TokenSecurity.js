@@ -10,4 +10,4 @@ function makeId(length) {
     return result;
 }
 
-module.exports = {makeid};
+module.exports = {makeId};
