@@ -20,10 +20,11 @@ const sequelize = new Sequelize({
     password: process.env.DBO_PASS,
     database: process.env.DBO_DATABASE,
     schema: process.env.DBO_SCHEMA,
-    port: process.env.DBO_PORT
+    port: process.env.DBO_PORT,
+    logging: false,
 });
 sequelize.authenticate().then(() => {
-    console.log('Connection has been established successfully.');
+    console.log('Connection to DB has been established successfully.');
 }).catch((error) => {
     console.error('Unable to connect to the database:', error);
 
@@ -56,7 +57,7 @@ VerificationCode.belongsTo(User, {foreignKey: 'userId'});
 AccountState.hasOne(User, {foreignKey: 'accountStateId'});
 User.belongsTo(AccountState, {foreignKey: 'accountStateId'});
 
-User.hasMany(Pass, {foreignKey: 'userId'});
+User.hasOne(Pass, {foreignKey: 'userId'});
 Pass.belongsTo(User, {foreignKey: 'userId'});
 
 Pass.hasMany(Token, {foreignKey: 'passId'});

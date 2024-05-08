@@ -1,4 +1,4 @@
-const {verifyUser, createUser, sendVerificationEmail} = require("../controllers/UsersController");
+const {verifyUser, createUser, sendVerificationEmail, authenticateUser, removeUser, getUser, updateUser} = require("../controllers/UsersController");
 
 const BASE_PATH = '/users';
 
@@ -10,6 +10,9 @@ function Users(app) {
      * @param {string} userInfo.password - User username
      * @param {string} userInfo.nickname - User username
      * @param {string} userInfo.base - User password
+     *
+     * return:
+     * @param {string} message - Response message
      **/
     app.post(BASE_PATH + "/create", async (req, res) => {
         const {userInfo} = req.body;
@@ -19,10 +22,13 @@ function Users(app) {
     });
 
     /*** Get user by id and authenticator
-        * @param {string} id - User id
-        * @param {string} authKey - User authenticator
+     * @param {string} id - User id
+     * @param {string} authKey - User authenticator
+     *
+     * return:
+     * @param {string} message - Response message
+     * @param {Object} user - User information
      **/
-
     app.get(BASE_PATH + "/:id", async (req, res) => {
         const {id} = req.params;
         const {authKey} = req.body;
@@ -32,17 +38,51 @@ function Users(app) {
         res.status(response.status).json({message: response.message, user: response.user});
     });
 
-    //Update user by id and authenticator
+    /*** Update user by id and authenticator
+     * @param {string} user_id - User id
+     * @param {string} authKey - User authenticator
+     * @param {Object} userUpdatedInfo - User updated information
+     * @param {string} userUpdatedInfo.email - User email
+     * @param {string} userUpdatedInfo.playerId - User username
+     * @param {string} userUpdatedInfo.nickname - User username
+     * @param {string} userUpdatedInfo.base - User password
+     *
+     *
+     * return:
+     * @param {string} message - Response message
+     **/
     app.put(BASE_PATH + "/:id", async (req, res) => {
+        const {user_id} = req.params;
+        const {authKey, userUpdatedInfo} = req.body;
 
+        const response = await updateUser(user_id, authKey, userUpdatedInfo);
+
+        res.status(response.status).json({message: response.message});
     });
 
-    //Delete user by id and authenticator
+    /*** Remove user by id and authenticator
+     * @param {string} user_id - User id
+     * @param {string} authKey - User authenticator
+     *
+     * return:
+     * @param {string} message - Response message
+     **/
     app.delete(BASE_PATH + "/:id", async (req, res) => {
+        const {authKey, user_id} = req.body;
 
+        const response = await removeUser(user_id, authKey);
+
+        res.status(response.status).json({message: response.message});
     });
 
-    //Authenticate user
+    /*** Authenticate user
+     * @param {string} email - User email
+     * @param {string} password - User password
+     *
+     * return:
+     * @param {string} message - Response message
+     * @param {string} authKey - User authenticator
+     **/
     app.post(BASE_PATH + "/auth", async (req, res) => {
         const {email, password} = req.body;
 
@@ -51,6 +91,12 @@ function Users(app) {
         res.status(response.status).json({message: response.message, authKey: response.authKey});
     });
 
+    /*** Ask for verification code
+     * @param {string} email - User email
+     *
+     * return:
+     * @param {string} message - Response message
+     * **/
     app.post(BASE_PATH + "/askverifcode",async (req, res) => {
         const {email} = req.body;
 
@@ -59,7 +105,10 @@ function Users(app) {
     });
 
     /*** Confirm user email
-        * @param {string} verifToken - Verification token
+     * @param {string} verifToken - Verification token
+     *
+     * return:
+     * @param {string} message - Response message
      **/
     app.get(BASE_PATH + "/confirm/:verifToken", async (req, res) => {
         const {verifToken} = req.params;
@@ -67,6 +116,7 @@ function Users(app) {
         const response = await verifyUser(verifToken);
         res.status(response.status).json({message: response.message});
     });
+
 }
 
 module.exports = {Users};

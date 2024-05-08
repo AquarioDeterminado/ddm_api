@@ -1,24 +1,34 @@
 const {sequelize} = require("../conf/DB");
 const {sendGrid} = require("../conf/SendGrid");
-const {isDate, isEmail, stripLow, trim, normalizeEmail} = require("validator");
+const {normalizeEmail} = require("validator");
 const {makeid} = require("../utils/TokenSecurity");
-const {app, API_URL} = require("../app");
+const {API_URL} = require("../app");
 const crypto = require('crypto');
 const {pbkdf2Sync: pbkdf2} = require("pbkdf2");
 const {AccountStateTypes} = require("../models/AccountState");
 
 const codeLifeTime = 60 * 5;
 
-function authenticateUser(email, password) {
-    const user = sequelize.models.user.findOne({where: {email: email}, include: [sequelize.models.pass]});
-    if (user === null || user === undefined)
-        return {status: 400, message: "User not found"};
-    else if (user.pass.hash !== pbkdf2(password, user.pass.salt, user.pass.iterations, 64, 'sha512').toString('UTF-8'))
-        return {status: 400, message: "Invalid password"};
+async function authenticateUser(email, password) {
+    try {
+        const user = await sequelize.models.user.findOne({where: {email: email}});
+        const pass = await sequelize.models.pass.findOne({where: {userId: user.id}});
 
-    const token = makeid(18);
-    const renewalDate = Date.now() + 3600;
-    sequelize.models.token.create({token: token, renewalDate: renewalDate}).setUser(user);
+        if (user === null)
+            return {status: 400, message: "User not found"};
+        else if (pass.hash !== pbkdf2(password, pass.salt, pass.iterations, 64, 'sha512').toString('UTF-8'))
+            return {status: 400, message: "Invalid password"};
+
+        const token = makeid(18);
+        const renewalDate = Date.now() + 3600;
+
+        const newToken = await sequelize.models.token.create({token: token, renewalDate: renewalDate});
+        await newToken.setPass(pass);
+        return {status: 200, message: "Auth key created", authKey: token};
+    } catch (error) {
+        console.log(`Error creating auth key: ${error}`);
+        return {status: 500, message: "Error creating auth key"};
+    }
 }
 
 async function checkAuthKey(id, authKey) {
@@ -194,7 +204,13 @@ async function emailUsed(email) {
 }
 
 async function checkUserInfo(userInfo) {
+    if (userInfo === undefined || userInfo === null)
+        return {ready: false, message: "User information is required"};
+
     var cleanInfo = {};
+
+    if (userInfo.email === undefined)
+        return {ready: false, message: "Email is required"};
     if (isEmail(userInfo.email))
         cleanInfo = {...cleanInfo, email: normalizeEmail(userInfo.email)};
     else
@@ -262,5 +278,38 @@ async function AccountState(state) {
     return await sequelize.models.account_state.findOne({where: {state: state}});
 }
 
+async function removeUser(userId, authKey) {
+    const authVerif = await checkAuthKey(userId, authKey);
+    if (!authVerif.verified)
+        return {status: 400, message: authVerif.message};
+    else if (authVerif.user_id !== userId)
+        return {status: 400, message: "User not authorized"};
 
-module.exports = {createUser, verifyUser, sendVerificationEmail};
+    const user = sequelize.models.user.findOne({where: {id: userId}});
+    user.destroy();
+    return {status: 200, message: "User removed"};
+}
+
+async function updateUser(userId, authKey, updatedUserInfo) {
+    const authVerif = await checkAuthKey(userId, authKey);
+    if (!authVerif.verified)
+        return {status: 400, message: authVerif.message};
+    else if (authVerif.user_id !== userId)
+        return {status: 400, message: "User not authorized"};
+
+    const user = sequelize.models.user.findOne({where: {id: userId}});
+    const player = await sequelize.models.player.findOne({where: {id: updatedUserInfo.playerId}});
+
+    //TODO: Check Info
+    if (updatedUserInfo.email !== undefined)
+        user.setEmail(updatedUserInfo.email);
+    if (updatedUserInfo.nickname !== undefined)
+        player.setNickname(updatedUserInfo.nickname);
+    if (updatedUserInfo.base !== undefined)
+        player.setBase(updatedUserInfo.base);
+
+    user.save();
+    return {status: 200, message: "User updated"};
+}
+
+module.exports = {createUser, verifyUser, sendVerificationEmail, authenticateUser, getUser, removeUser, updateUser};
