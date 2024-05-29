@@ -12,5 +12,9 @@ module.exports = (sequelize, DataTypes) =>
     creationDate: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW
-    }
+    } ,
+      gender: {
+          type: DataTypes.STRING,
+          allowNull: true
+      }
   });

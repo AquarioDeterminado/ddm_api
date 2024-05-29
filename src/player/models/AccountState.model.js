@@ -1,4 +1,4 @@
-const {sequelize} = require("../conf/DB");
+const {sequelize} = require("../../conf/DB.conf");
 
 const AccountStateTypes = {
     ACTIVE: 'ACTIVE',
@@ -8,7 +8,7 @@ const AccountStateTypes = {
 };
 
 
-const AccountStateModel = (sequelize, DataTypes) => {
+function AccountStateModel (sequelize, DataTypes) {
     const model = sequelize.define('account_state', {
         id: {
             type: DataTypes.INTEGER,

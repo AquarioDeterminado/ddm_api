@@ -1,21 +1,21 @@
-
+const {getEvents, getEvent, createEvent, updateEvent, deleteEvent} = require("../controllers/Events.controller");
 
 const BASE_PATH = "/events";
 
-function Events(app) {
+function EventsRoute(app) {
 
 
-    /*** Gets Events Available for user
+    /*** Gets EventsRoute Available for user
      * @param {string} authKey
      *
      * return:
      * @returns {string} message
      * @returns {array} events
      */
-    app.get(BASE_PATH, (req, res) => {
+    app.post(`${BASE_PATH}/`, async (req, res) => {
         const {authKey} = req.body;
 
-        const response = getEvents(authKey);
+        const response = await getEvents(authKey);
 
         res.status(response.status).send({message: response.message, events: response.events});
     });
@@ -84,3 +84,5 @@ function Events(app) {
     });
 
 }
+
+module.exports = {Events: EventsRoute};

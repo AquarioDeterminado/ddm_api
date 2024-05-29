@@ -1,11 +1,11 @@
-const {sequelize} = require("../conf/DB");
-const {sendGrid} = require("../conf/SendGrid");
+const {sequelize} = require("../../conf/DB.conf");
+const {sendGrid} = require("../../conf/SendGrid.conf");
 const {normalizeEmail} = require("validator");
-const {makeId} = require("../utils/TokenSecurity");
-const {API_URL} = require("../app");
+const {makeId} = require("../../utils/TokenSecurity.util");
+const {API_URL} = require("../../app");
 const crypto = require('crypto');
 const {pbkdf2Sync: pbkdf2} = require("pbkdf2");
-const {AccountStateTypes} = require("../models/AccountState");
+const {AccountStateTypes} = require("../models/AccountState.model");
 
 const codeLifeTime = 60 * 5;
 

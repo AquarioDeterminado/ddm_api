@@ -1,8 +1,8 @@
-const {verifyUser, createUser, sendVerificationEmail, authenticateUser, removeUser, getUser, updateUser} = require("../controllers/UsersController");
+const {verifyUser, createUser, sendVerificationEmail, authenticateUser, removeUser, getUser, updateUser} = require("../controllers/Users.controller");
 
 const BASE_PATH = '/users';
 
-function Users(app) {
+function UsersRoute(app) {
 
     /*** Create a new user
      * @param {Object} userInfo - User information
@@ -119,4 +119,4 @@ function Users(app) {
 
 }
 
-module.exports = {Users};
+module.exports = {Users: UsersRoute};

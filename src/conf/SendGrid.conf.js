@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const sendGrid = nodemailer.createTransport({
+const sendGridConf = nodemailer.createTransport({
     host: 'smtp.sendgrid.net',
     port: 587,
     auth: {
@@ -9,4 +9,4 @@ const sendGrid = nodemailer.createTransport({
     }
 });
 
-module.exports = {sendGrid}
+module.exports = {sendGrid: sendGridConf}

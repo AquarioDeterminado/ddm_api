@@ -1,6 +1,10 @@
-function getEvents(authKey) {
-    // Get events from database
-    // return {status: 200, message: "Events retrieved successfully", events: events};
+const {sequelize} = require("../../conf/DB.conf");
+
+async function getEvents(authKey) {
+
+    const events = await sequelize.models.event.findAll();
+
+    return {status: 200, message: "Events retrieved successfully", events: events};
 }
 
 function getEvent(id, authKey) {
@@ -25,4 +29,12 @@ function deleteEvent(id, authKey) {
     // return {status: 200, message: "Event deleted successfully"};
 
 }
+
+module.exports = {
+    getEvents,
+    getEvent,
+    createEvent,
+    updateEvent,
+    deleteEvent
+};
 

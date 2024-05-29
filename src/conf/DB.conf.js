@@ -1,28 +1,35 @@
-const {AccountStateModel} = require('../models/AccountState');
-const BaseModel = require('../models/Base');
-const DogModel = require('../models/Dog');
-const FriendRequestModel = require('../models/FriendRequest');
-const GameEnvModel = require('../models/GameEnv');
-const LitterModel = require('../models/Litter');
-const PackModel = require('../models/Pack');
-const PassModel = require('../models/Pass');
-const PlayerModel = require('../models/Player');
-const TokenModel = require('../models/Token');
-const UserModel = require('../models/User');
-const VerificationModel = require('../models/VerificationCode');
+const {AccountStateModel} = require('../player/models/AccountState.model');
+const BaseModel = require('../player/models/Base.model');
+const DogModel = require('../Dogs/models/Dog.model');
+const FriendRequestModel = require('../player/models/FriendRequest.model');
+const EventModel = require('../battle/models/Event.model');
+const GameEnvModel = require('../battle/models/GameEnv.model');
+const LitterModel = require('../Dogs/models/Litter.model');
+const PackModel = require('../Dogs/models/Pack.model');
+const PassModel = require('../player/models/Pass.model');
+const PlayerModel = require('../player/models/Player.model');
+const TokenModel = require('../player/models/Token.model');
+const UserModel = require('../player/models/User.model');
+const VerificationModel = require('../player/models/VerificationCode.model');
 const {DataTypes, Sequelize} = require('sequelize');
+const {app} = require("../app");
 
-
-const sequelize = new Sequelize({
-    dialect: 'postgres',
-    host: process.env.DBO_HOST,
-    username: process.env.DBO_USER,
-    password: process.env.DBO_PASS,
-    database: process.env.DBO_DATABASE,
-    schema: process.env.DBO_SCHEMA,
-    port: process.env.DBO_PORT,
-    logging: false,
-});
+try {
+    const sequelize = new Sequelize({
+        dialect: 'postgres',
+        host: process.env.DBO_HOST,
+        username: process.env.DBO_USER,
+        password: process.env.DBO_PASS,
+        database: process.env.DBO_DATABASE,
+        schema: process.env.DBO_SCHEMA,
+        port: process.env.DBO_PORT,
+        logging: false,
+    });
+}
+catch (error) {
+    console.error('Unable to connect to the database:', error);
+    process.exit(4);
+}
 sequelize.authenticate().then(() => {
     console.log('Connection to DB has been established successfully.');
 }).catch((error) => {
@@ -36,6 +43,7 @@ const AccountState = AccountStateModel(sequelize, DataTypes);
 const Base = BaseModel(sequelize, DataTypes);
 const Dog = DogModel(sequelize, DataTypes);
 const FriendRequest = FriendRequestModel(sequelize, DataTypes);
+const Event = EventModel(sequelize, DataTypes);
 const GameEnv = GameEnvModel(sequelize, DataTypes);
 const Litter = LitterModel(sequelize, DataTypes);
 const Pack = PackModel(sequelize, DataTypes);
@@ -81,6 +89,7 @@ Dog.belongsToMany(Player, {through: "litter", foreignKey: 'dogId'});
 
 Pack.hasOne(Litter , {foreignKey: 'litterId'});
 Litter.belongsTo(Pack, {foreignKey: 'litterId'});
+
 
 
 sequelize.sync({ alter: true, force: false });
