@@ -12,7 +12,7 @@ function UsersRoute(app) {
      * @param {string} userInfo.base - User password
      *
      * return:
-     * @param {string} message - Response message
+     * @returns {string} message - Response message
      **/
     app.post(BASE_PATH + "/create", async (req, res) => {
         const {userInfo} = req.body;
@@ -26,8 +26,8 @@ function UsersRoute(app) {
      * @param {string} authKey - User authenticator
      *
      * return:
-     * @param {string} message - Response message
-     * @param {Object} user - User information
+     * @returns {string} message - Response message
+     * @returns {Object} user - User information
      **/
     app.get(BASE_PATH + "/:id", async (req, res) => {
         const {id} = req.params;
@@ -49,7 +49,7 @@ function UsersRoute(app) {
      *
      *
      * return:
-     * @param {string} message - Response message
+     * @returns {string} message - Response message
      **/
     app.put(BASE_PATH + "/:id", async (req, res) => {
         const {user_id} = req.params;
@@ -65,7 +65,7 @@ function UsersRoute(app) {
      * @param {string} authKey - User authenticator
      *
      * return:
-     * @param {string} message - Response message
+     * @returns {string} message - Response message
      **/
     app.delete(BASE_PATH + "/:id", async (req, res) => {
         const {authKey, user_id} = req.body;
@@ -80,8 +80,8 @@ function UsersRoute(app) {
      * @param {string} password - User password
      *
      * return:
-     * @param {string} message - Response message
-     * @param {string} authKey - User authenticator
+     * @returns {string} message - Response message
+     * @returns {string} authKey - User authenticator
      **/
     app.post(BASE_PATH + "/auth", async (req, res) => {
         const {email, password} = req.body;
@@ -95,7 +95,7 @@ function UsersRoute(app) {
      * @param {string} email - User email
      *
      * return:
-     * @param {string} message - Response message
+     * @returns {string} message - Response message
      * **/
     app.post(BASE_PATH + "/askverifcode",async (req, res) => {
         const {email} = req.body;
@@ -108,7 +108,7 @@ function UsersRoute(app) {
      * @param {string} verifToken - Verification token
      *
      * return:
-     * @param {string} message - Response message
+     * @returns {string} message - Response message
      **/
     app.get(BASE_PATH + "/confirm/:verifToken", async (req, res) => {
         const {verifToken} = req.params;
