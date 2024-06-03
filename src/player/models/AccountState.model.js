@@ -8,8 +8,8 @@ const AccountStateTypes = {
 };
 
 
-function AccountStateModel (sequelize, DataTypes) {
-    const model = sequelize.define('account_state', {
+const AccountStateModel = (sequelize, DataTypes) =>
+    sequelize.define('account_state', {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -20,10 +20,8 @@ function AccountStateModel (sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: false
         }
-    });
+    })
 
-    return model;
-}
 
 function populate () {
     const AccountState = sequelize.models.account_state;
