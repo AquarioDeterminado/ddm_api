@@ -1,9 +1,10 @@
-const {AccountStateModel} = require('../player/models/AccountState.model');
+const {AccountStateModel, populate: AccountStatePopulate} = require('../player/models/AccountState.model');
 const BaseModel = require('../player/models/Base.model');
 const DogModel = require('../Dogs/models/Dog.model');
 const FriendRequestModel = require('../player/models/FriendRequest.model');
 const EventModel = require('../battle/models/Event.model');
 const GameEnvModel = require('../battle/models/GameEnv.model');
+const {GameStateModel} = require("../battle/models/GameState.model");
 const LitterModel = require('../Dogs/models/Litter.model');
 const PackModel = require('../Dogs/models/Pack.model');
 const PassModel = require('../player/models/Pass.model');
@@ -14,22 +15,17 @@ const VerificationModel = require('../player/models/VerificationCode.model');
 const {DataTypes, Sequelize} = require('sequelize');
 const {app} = require("../app");
 
-try {
-    const sequelize = new Sequelize({
-        dialect: 'postgres',
-        host: process.env.DBO_HOST,
-        username: process.env.DBO_USER,
-        password: process.env.DBO_PASS,
-        database: process.env.DBO_DATABASE,
-        schema: process.env.DBO_SCHEMA,
-        port: process.env.DBO_PORT,
-        logging: false,
-    });
-}
-catch (error) {
-    console.error('Unable to connect to the database:', error);
-    process.exit(4);
-}
+const sequelize = new Sequelize({
+    dialect: 'postgres',
+    host: process.env.DBO_HOST,
+    username: process.env.DBO_USER,
+    password: process.env.DBO_PASS,
+    database: process.env.DBO_DATABASE,
+    schema: process.env.DBO_SCHEMA,
+    port: process.env.DBO_PORT,
+    logging: false,
+});
+
 sequelize.authenticate().then(() => {
     console.log('Connection to DB has been established successfully.');
 }).catch((error) => {
@@ -45,6 +41,7 @@ const Dog = DogModel(sequelize, DataTypes);
 const FriendRequest = FriendRequestModel(sequelize, DataTypes);
 const Event = EventModel(sequelize, DataTypes);
 const GameEnv = GameEnvModel(sequelize, DataTypes);
+const GameState = GameStateModel(sequelize, DataTypes);
 const Litter = LitterModel(sequelize, DataTypes);
 const Pack = PackModel(sequelize, DataTypes);
 const Pass = PassModel(sequelize, DataTypes);
@@ -83,6 +80,15 @@ GameEnv.belongsTo(Player, {foreignKey: 'player1Id'});
 Player.hasMany(GameEnv, {foreignKey: 'player1Id'});
 GameEnv.belongsTo(Player, {foreignKey: 'player2Id'});
 Player.hasMany(GameEnv, {foreignKey: 'player2Id'});
+GameEnv.belongsTo(Player, {foreignKey: 'playerWon'});
+Player.hasMany(GameEnv, {foreignKey: 'playerWon'});
+
+GameEnv.belongsTo(Event, {foreignKey: 'eventId'});
+Event.hasOne(GameEnv, {foreignKey: 'eventId'});
+
+GameEnv.belongsTo(GameState, {foreignKey: 'gameStateId'});
+GameState.hasOne(GameEnv, {foreignKey: 'gameStateId'});
+
 
 Player.belongsToMany(Dog, {through: "litter", foreignKey: 'playerId'});
 Dog.belongsToMany(Player, {through: "litter", foreignKey: 'dogId'});
@@ -92,7 +98,7 @@ Litter.belongsTo(Pack, {foreignKey: 'litterId'});
 
 
 
-sequelize.sync({ alter: true, force: false });
+sequelize.sync({ alter: true, force: process.env.FORCE_DB_SYNC});
 
 
 

@@ -19,7 +19,7 @@ async function authenticateUser(email, password) {
         else if (pass.hash !== pbkdf2(password, pass.salt, pass.iterations, 64, 'sha512').toString('UTF-8'))
             return {status: 400, message: "Invalid password"};
 
-        const token = makeid(18);
+        const token = makeId(18);
         const renewalDate = Date.now() + 3600;
 
         const newToken = await sequelize.models.token.create({token: token, renewalDate: renewalDate});
@@ -85,7 +85,7 @@ async function createVerifCode(id) {
             }
         }
 
-        const code = makeid(18);
+        const code = makeId(18);
         const newCode = await sequelize.models.verification_code.create({code: code, expirationDate: Date.now() + codeLifeTime});
         newCode.setUser(user);
 
@@ -99,8 +99,9 @@ async function createVerifCode(id) {
 async function sendVerificationEmail(email) {
 
     const user = await sequelize.models.user.findOne({where: {email: email}, include: sequelize.models.account_state});
-    if (user === null || user === undefined || user.account_state.state !== AccountStateTypes.WAITING_VERIFICATION)
-        return {status: 400, message: "User not eligible for verification"};
+    if (user === null || user === undefined)
+        if (user.account_state.state !== AccountStateTypes.WAITING_VERIFICATION)
+            return {status: 400, message: "User not eligible for verification"};
 
     const newVerifCodeRequest = await createVerifCode(user.id);
     if (newVerifCodeRequest.status !== 200)
@@ -211,7 +212,7 @@ async function checkUserInfo(userInfo) {
 
     if (userInfo.email === undefined)
         return {ready: false, message: "Email is required"};
-    if (isEmail(userInfo.email))
+    if (normalizeEmail(userInfo.email))
         cleanInfo = {...cleanInfo, email: normalizeEmail(userInfo.email)};
     else
         return {ready: false, message: "Email is invalid"};

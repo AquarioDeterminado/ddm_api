@@ -5,8 +5,8 @@ const GameStates = {
     ABANDONED: 'ABANDONED',
 };
 
-const GameStateModel = (sequelize, DataTypes) => {
-    const model = sequelize.define('game_state', {
+const GameStateModel = (sequelize, DataTypes) =>
+    sequelize.define('game_state', {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -17,7 +17,10 @@ const GameStateModel = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         }
-    });
+    })
 
-    return model;
-}
+
+module.exports = {
+    GameStates,
+    GameStateModel
+};
