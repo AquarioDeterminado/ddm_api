@@ -15,7 +15,11 @@ function EventsRoute(app) {
     app.post(`${BASE_PATH}/`, async (req, res) => {
         const {authKey} = req.body;
 
+        console.log("event list\n");
+
         const response = await getEvents(authKey);
+
+        console.log(response.events)
 
         res.status(response.status).send({message: response.message, events: response.events});
     });
