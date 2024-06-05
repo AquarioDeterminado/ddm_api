@@ -69,15 +69,22 @@ async function addCardToCurrentHand(userId, dogId) {
         const pack = (await user.getPacks({where: {active: true}}))[0];
         const player = (await user.getPlayers())[0];
         const litter = await player.getLitter({where: {active: true}});
+        const litterInPack = await pack.getLitter();
+
+        for (let i = 0; i < litterInPack.length; i++) {
+            const dog = await litterInPack[i].getDog();
+
+            if (dog.id === dogId)
+                return {status: 400, message: "Dog already in deck"};
+        }
 
         for (let i = 0; i < litter.length; i++) {
             const dog = await litter[i].getDog();
 
             if (dog.id === dogId) {
-                await pack.addLitter(await dog.getLitter());
+                await pack.addLitter(await dog.getLitter({where: {playerId: player.id}}));
                 return {status: 200, message: "Dog added to deck successfully"};
             }
-
         }
 
     } catch (e) {

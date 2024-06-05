@@ -6,6 +6,7 @@ const {API_URL} = require("../../app");
 const crypto = require('crypto');
 const {pbkdf2Sync: pbkdf2} = require("pbkdf2");
 const {AccountStateTypes} = require("../models/AccountState.model");
+const {createStarterPack} = require("./StarterPack.controller");
 
 const codeLifeTime = 60 * 5;
 
@@ -117,7 +118,7 @@ async function sendVerificationEmail(email) {
     if (newVerifCodeRequest.status !== 200)
         return newVerifCodeRequest;
 
-    const verifPath = `${API_URL}/verify/${newVerifCodeRequest.verifCode}`;
+    const verifPath = `http://localhost:3000/users/confirm/${newVerifCodeRequest.verifCode.code}`;
 
     const sender = "no-reply@dogdm.pt"
     const subject = "DogDM Account Verification";
@@ -181,6 +182,10 @@ async function createUser(userInfo) {
             await newUser.save();
 
             sendVerificationEmail(cleanInfo.email, newUser.id);
+
+            if((await createStarterPack(newUser)).status !== 200)
+                throw new Error("Error creating starter pack");
+
             return {status: 200, message: "User created; email verification sent"};
         } catch (error) {
             if (newUser !== undefined)
