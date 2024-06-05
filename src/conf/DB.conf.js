@@ -9,6 +9,7 @@ const LitterModel = require('../Dogs/models/Litter.model');
 const PackModel = require('../Dogs/models/Pack.model');
 const PassModel = require('../player/models/Pass.model');
 const PlayerModel = require('../player/models/Player.model');
+const PlayModel = require('../battle/models/Play.model');
 const TokenModel = require('../player/models/Token.model');
 const UserModel = require('../player/models/User.model');
 const VerificationModel = require('../player/models/VerificationCode.model');
@@ -32,72 +33,90 @@ sequelize.authenticate().then(() => {
         console.log('DB created');
     }).then(() => {
 
-        sequelize.sync({alter: true, force: process.env.FORCE_DB_SYNC}).then(() => {
+        console.log('All models were synchronized successfully.');
 
-            console.log('All models were synchronized successfully.');
+        const {
+            accountstate: AccountState,
+            base: Base,
+            dog: Dog,
+            friend_request: FriendRequest,
+            event: Event,
+            game_env: GameEnv,
+            game_state: GameState,
+            litter: Litter,
+            pack: Pack,
+            pass: Pass,
+            player: Player,
+            play: Play,
+            token: Token,
+            user: User,
+            verification_code: VerificationCode
+        } = sequelize.models
 
-            const {
-                accountstate: AccountState,
-                        base: Base,
-                        dog: Dog ,
-                        friend_request: FriendRequest ,
-                        event: Event ,
-                        game_env: GameEnv ,
-                        game_state: GameState ,
-                        litter: Litter ,
-                        pack: Pack,
-                        pass: Pass,
-                        player: Player ,
-                        token: Token ,
-                        user: User,
-                        verification_code: VerificationCode
-            } = sequelize.models
+        User.hasMany(Player, {foreignKey: 'userId'});
+        Player.belongsTo(User, {foreignKey: 'userId'});
 
-            User.hasMany(Player, {foreignKey: 'userId'});
-            Player.belongsTo(User, {foreignKey: 'userId'});
+        User.hasOne(VerificationCode, {foreignKey: 'userId'});
+        VerificationCode.belongsTo(User, {foreignKey: 'userId'});
 
-            User.hasOne(VerificationCode, {foreignKey: 'userId'});
-            VerificationCode.belongsTo(User, {foreignKey: 'userId'});
+        AccountState.hasOne(User, {foreignKey: 'accountStateId'});
+        User.belongsTo(AccountState, {foreignKey: 'accountStateId'});
 
-            AccountState.hasOne(User, {foreignKey: 'accountStateId'});
-            User.belongsTo(AccountState, {foreignKey: 'accountStateId'});
+        User.hasOne(Pass, {foreignKey: 'userId'});
+        Pass.belongsTo(User, {foreignKey: 'userId'});
 
-            User.hasOne(Pass, {foreignKey: 'userId'});
-            Pass.belongsTo(User, {foreignKey: 'userId'});
+        Pass.hasMany(Token, {foreignKey: 'passId'});
+        Token.belongsTo(Pass, {foreignKey: 'passId'});
 
-            Pass.hasMany(Token, {foreignKey: 'passId'});
-            Token.belongsTo(Pass, {foreignKey: 'passId'});
+        FriendRequest.belongsTo(User, {foreignKey: 'senderId'});
+        User.hasOne(FriendRequest, {foreignKey: 'senderId'});
+        FriendRequest.belongsTo(User, {foreignKey: 'receiverId'});
+        User.hasOne(FriendRequest, {foreignKey: 'receiverId'});
 
-            FriendRequest.belongsTo(User, {foreignKey: 'senderId'});
-            User.hasOne(FriendRequest, {foreignKey: 'senderId'});
-            FriendRequest.belongsTo(User, {foreignKey: 'receiverId'});
-            User.hasOne(FriendRequest, {foreignKey: 'receiverId'});
+        User.hasMany(Base, {foreignKey: 'userId'});
+        Base.belongsTo(User, {foreignKey: 'userId'});
 
-            User.hasMany(Base, {foreignKey: 'userId'});
-            Base.belongsTo(User, {foreignKey: 'userId'});
+        GameEnv.belongsTo(Player, {foreignKey: 'player1Id'});
+        Player.hasMany(GameEnv, {foreignKey: 'player1Id'});
+        GameEnv.belongsTo(Player, {foreignKey: 'player2Id'});
+        Player.hasMany(GameEnv, {foreignKey: 'player2Id'});
+        GameEnv.belongsTo(Player, {foreignKey: 'playerWon'});
+        Player.hasMany(GameEnv, {foreignKey: 'playerWon'});
 
-            GameEnv.belongsTo(Player, {foreignKey: 'player1Id'});
-            Player.hasMany(GameEnv, {foreignKey: 'player1Id'});
-            GameEnv.belongsTo(Player, {foreignKey: 'player2Id'});
-            Player.hasMany(GameEnv, {foreignKey: 'player2Id'});
-            GameEnv.belongsTo(Player, {foreignKey: 'playerWon'});
-            Player.hasMany(GameEnv, {foreignKey: 'playerWon'});
+        GameEnv.belongsTo(Event, {foreignKey: 'eventId'});
+        Event.hasOne(GameEnv, {foreignKey: 'eventId'});
 
-            GameEnv.belongsTo(Event, {foreignKey: 'eventId'});
-            Event.hasOne(GameEnv, {foreignKey: 'eventId'});
-
-            GameEnv.belongsTo(GameState, {foreignKey: 'gameStateId'});
-            GameState.hasOne(GameEnv, {foreignKey: 'gameStateId'});
+        GameEnv.belongsTo(GameState, {foreignKey: 'gameStateId'});
+        GameState.hasOne(GameEnv, {foreignKey: 'gameStateId'});
 
 
-            Player.belongsToMany(Dog, {through: "litter", foreignKey: 'playerId'});
-            Dog.belongsToMany(Player, {through: "litter", foreignKey: 'dogId'});
+        Player.hasMany(Litter, {foreignKey: 'playerId'});
+        Litter.belongsTo(Player, {foreignKey: 'playerId'});
 
-            Pack.hasOne(Litter, {foreignKey: 'litterId'});
-            Litter.belongsTo(Pack, {foreignKey: 'litterId'});
+        Dog.hasMany(Litter, { foreignKey: 'dogId'});
+        Litter.belongsTo(Dog, { foreignKey: 'dogId'});
+
+        Play.belongsTo(GameEnv, {foreignKey: 'gameEnvId'});
+        GameEnv.hasMany(Play, {foreignKey: 'gameEnvId'});
+
+        Play.belongsTo(Player, {foreignKey: 'playerId'});
+        Player.hasMany(Play, {foreignKey: 'playerId'});
+
+        Play.belongsTo(Dog, {foreignKey: 'dogId'});
+        Dog.hasMany(Play, {foreignKey: 'dogId'});
+
+        Pack.belongsToMany(Litter, {foreignKey: 'packId', through: 'litter_pack'});
+        Litter.belongsToMany(Pack, {foreignKey: 'litterId', through: 'litter_pack'});
+
+        Pack.belongsTo(User, {foreignKey: 'userId'});
+        User.hasMany(Pack, {foreignKey: 'userId'});
+
+        const force = process.env.FORCE_DB_SYNC === 'true';
+        sequelize.sync({alter: true, force: force}).then(() => {
+            console.log('All relations were synchronized successfully.');
+
         });
     });
-    ;
 }).catch((error) => {
     console.error('Unable to connect to the database:', error);
 });
@@ -114,6 +133,7 @@ async function makeDB() {
     const Pack = PackModel(sequelize, DataTypes);
     const Pass = PassModel(sequelize, DataTypes);
     const Player = PlayerModel(sequelize, DataTypes);
+    const Play = PlayModel(sequelize, DataTypes);
     const Token = TokenModel(sequelize, DataTypes);
     const User = UserModel(sequelize, DataTypes);
     const VerificationCode = VerificationModel(sequelize, DataTypes);

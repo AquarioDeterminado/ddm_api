@@ -14,4 +14,12 @@ module.exports =  (sequelize, DataTypes) =>
             type: DataTypes.STRING, //TODO: implement sequelize-file
             allowNull: false
         },
+         hp: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        attack: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        }
     });

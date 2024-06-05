@@ -6,13 +6,12 @@ module.exports = (sequelize, DataTypes) =>
             allowNull: false,
             primaryKey: true
         },
-        creation_date: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: DataTypes.NOW
+        player1_hp: {
+            type: DataTypes.INTEGER,
+            allowNull: false
         },
-        last_update: {
-            type: DataTypes.DATE,
-            allowNull: true
-        }
+        player2_hp: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
     });

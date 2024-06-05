@@ -1,0 +1,59 @@
+const {getCurrentDeck, getLitter, removeCardFromPack, addCardToCurrentHand} =  require("../controllers/Cards.controller");
+const {sequelize} = require("../../conf/DB.conf");
+const BASE_URL = "/cards";
+
+const Cards = (app) => {
+    app.post(BASE_URL + "/currentpack/", async (req, res) => {
+        const {authKey} = req.body;
+
+        const token = await sequelize.models.token.findOne({where: {token: authKey}});
+        const pass = await token.getPass();
+        const user = await pass.getUser();
+        const userId = user.id;
+
+        const response = await getCurrentDeck(userId);
+
+        res.status(response.status).json({message: response.message, pack: response.deck});
+    });
+
+    app.post(BASE_URL + "/litter/", async (req, res) => {
+        const {authKey} = req.body;
+
+        const token = await sequelize.models.token.findOne({where: {token: authKey}});
+        const pass = await token.getPass();
+        const user = await pass.getUser();
+        const userId = user.id;
+
+        const response = await getLitter(userId);
+
+        res.status(response.status).json({message: response.message, litter: response.litter});
+    });
+
+    app.post(BASE_URL + "/currentpack/add/", async (req, res) => {
+        const {authKey, cardId} = req.body;
+
+        const token = await sequelize.models.token.findOne({where: {token: authKey}});
+        const pass = await token.getPass();
+        const user = await pass.getUser();
+        const userId = user.id;
+
+        const response = await addCardToCurrentHand(userId, cardId);
+
+        res.status(response.status).json({message: response.message});
+    });
+
+    app.post(BASE_URL + "/currentpack/remove/", async (req, res) => {
+        const {authKey, cardId} = req.body;
+
+        const token = await sequelize.models.token.findOne({where: {token: authKey}});
+        const pass = await token.getPass();
+        const user = await pass.getUser();
+        const userId = user.id;
+
+        const response = await removeCardFromPack(userId, cardId);
+
+        res.status(response.status).json({message: response.message});
+    });
+}
+
+module.exports = {Cards: Cards};

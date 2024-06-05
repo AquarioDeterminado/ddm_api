@@ -19,8 +19,6 @@ function EventsRoute(app) {
 
         const response = await getEvents(authKey);
 
-        console.log(response.events)
-
         res.status(response.status).send({message: response.message, events: response.events});
     });
 

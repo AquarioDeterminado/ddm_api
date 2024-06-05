@@ -1,8 +1,15 @@
-const {verifyUser, createUser, sendVerificationEmail, authenticateUser, removeUser, getUser, updateUser} = require("../controllers/Users.controller");
+const {verifyUser, createUser, sendVerificationEmail, authenticateUser, removeUser, getUser, updateUser, getAllUsers,
+    authKeyVerif
+} = require("../controllers/Users.controller");
+const cors = require("cors");
 
 const BASE_PATH = '/users';
 
 function UsersRoute(app) {
+    app.use(cors({
+        origin: 'http://localhost:8080',
+        methods: ['GET', 'POST', 'PUT', 'DELETE']
+    }));
 
     /*** Create a new user
      * @param {Object} userInfo - User information
@@ -91,6 +98,14 @@ function UsersRoute(app) {
         res.status(response.status).json({message: response.message, authKey: response.authKey});
     });
 
+    app.post(BASE_PATH + "/authkey", async (req, res) => {
+        const {authKey} = req.body;
+
+        const response = await authKeyVerif(authKey);
+
+        res.status(response.status).json({message: response.message});
+    });
+
     /*** Ask for verification code
      * @param {string} email - User email
      *
@@ -117,6 +132,12 @@ function UsersRoute(app) {
         res.status(response.status).json({message: response.message});
     });
 
+    /*** Get all users
+     **/
+    app.get(BASE_PATH + "/", async (req, res) => {
+        const response = await getAllUsers();
+        res.status(response.status).json({message: response.message, users: response.users});
+    });
 }
 
 module.exports = {Users: UsersRoute};

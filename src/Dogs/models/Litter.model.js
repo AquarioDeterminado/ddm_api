@@ -5,10 +5,6 @@ module.exports = (sequelize, DataTypes) =>
             autoIncrement: true,
             primaryKey: true
         },
-        creationDate: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        },
         active: {
             type: DataTypes.BOOLEAN,
             defaultValue: true

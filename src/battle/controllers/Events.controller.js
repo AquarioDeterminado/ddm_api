@@ -12,9 +12,13 @@ function getEvent(id, authKey) {
     // return {status: 200, message: "Event retrieved successfully", event: event};
 }
 
-function createEvent(eventInfo, authKey) {
+function createEvent(eventInfo) {
     // Create event in database
     // return {status: 200, message: "Event created successfully"};
+
+    const event = sequelize.models.event.create(eventInfo);
+
+    return {status: 200, message: "Event created successfully", event: event};
 
 }
 
@@ -24,10 +28,24 @@ function updateEvent(id, eventInfo, authKey) {
 
 }
 
-function deleteEvent(id, authKey) {
+function deleteEvent(id) {
     // Delete event from database
     // return {status: 200, message: "Event deleted successfully"};
 
+    if (id === undefined || id === null) return {status: 400, message: "Event id is required"};
+
+    try {
+        const event = sequelize.models.event.destroy({
+            where: {
+                id: id
+            }
+        });
+        return {status: 200, message: "Event deleted successfully", event: event};
+    } catch (error) {
+        return {status: 500, message: "An error occurred while deleting the event", error: error};
+    }
+
+    return {status: 500, message: "An error occurred while deleting the event"};
 }
 
 module.exports = {

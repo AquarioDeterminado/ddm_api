@@ -10,15 +10,6 @@ module.exports = (sequelize, DataTypes) =>
             type: DataTypes.STRING,
             allowNull: false
         },
-        creation_date: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: DataTypes.NOW
-        },
-        last_update: {
-            type: DataTypes.DATE,
-            allowNull: true
-        },
         number_of_uses: {
             type: DataTypes.INTEGER,
             allowNull: false,

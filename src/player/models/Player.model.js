@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) =>
         },
         base: {
             type: DataTypes.GEOGRAPHY('POINT'),
-            allowNull: false
+            allowNull: true
         },
         lastLogin: {
             type: DataTypes.DATE,

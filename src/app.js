@@ -13,7 +13,9 @@ app.use(cors({
     origin: 'http://localhost:8080',
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
+
 exposeRoutes(app);
+
 app.listen(process.env.PORT, () => {
     console.log(`Server running on port ${process.env.PORT}`);
 });

@@ -27,8 +27,18 @@ async function authenticateUser(email, password) {
         return {status: 200, message: "Auth key created", authKey: token};
     } catch (error) {
         console.log(`Error creating auth key: ${error}`);
-        return {status: 500, message: "Error creating auth key"};
+        return {status: 500, message: "Error Logging In"};
     }
+}
+
+async function authKeyVerif(authKey) {
+const key = await sequelize.models.token.findOne({where: {token: authKey}});
+    if (key === null)
+        return {status: 400, message: "Auth key not found"};
+    else if (Date.now() > key.renewalDate)
+        return {status: 400, message: "Auth key expired"};
+    else
+        return {status: 200, message: "Auth key verified"};
 }
 
 async function checkAuthKey(id, authKey) {
@@ -92,7 +102,7 @@ async function createVerifCode(id) {
         return {status: 200, message: "Verification code created", verifCode: newCode};
     } catch (error) {
         console.log(`Error creating verification code: ${error}`);
-        return {status: 500, message: "Error creating verification code"};
+        return {status: 500, message: "Error Logging In"};
     }
 }
 
@@ -139,7 +149,7 @@ async function verifyUser(token) {
         const user = await sequelize.models.user.findOne({where: {id: verifCode.userId}});
 
         const activeState = await AccountState(AccountStateTypes.ACTIVE);
-        await user.setAccount_state(activeState);
+        await user.setAccountstate(activeState);
         await user.save();
         await verifCode.destroy();
         return {status: 200, message: "User verified"};
@@ -159,16 +169,15 @@ async function createUser(userInfo) {
         try {
             newUser = await sequelize.models.user.create({email: cleanInfo.email});
             newplayer = await sequelize.models.player.create({
-                nickname: cleanInfo.nickname,
-                base: { type: 'Point', coordinates: cleanInfo.base }
-            });
+                nickname: cleanInfo.nickname}
+            );
             pass = await sequelize.models.pass.create({hash: cleanInfo.password.hash, salt: cleanInfo.password.salt, iterations: cleanInfo.password.iterations});
 
             await pass.setUser(newUser);
             await newplayer.setUser(newUser);
 
-            const accountState = await sequelize.models.account_state.findOne({where: {state: AccountStateTypes.WAITING_VERIFICATION}});
-            await newUser.setAccount_state(accountState);
+            const accountState = await sequelize.models.accountstate.findOne({where: {state: AccountStateTypes.WAITING_VERIFICATION}});
+            await newUser.setAccountstate(accountState);
             await newUser.save();
 
             sendVerificationEmail(cleanInfo.email, newUser.id);
@@ -276,7 +285,7 @@ function checkPoint(point) {
 }
 
 async function AccountState(state) {
-    return await sequelize.models.account_state.findOne({where: {state: state}});
+    return await sequelize.models.accountstate.findOne({where: {state: state}});
 }
 
 async function removeUser(userId, authKey) {
@@ -313,4 +322,8 @@ async function updateUser(userId, authKey, updatedUserInfo) {
     return {status: 200, message: "User updated"};
 }
 
-module.exports = {createUser, verifyUser, sendVerificationEmail, authenticateUser, getUser, removeUser, updateUser};
+async function getAllUsers() {
+    return {status: 200, users: await sequelize.models.user.findAll()};
+}
+
+module.exports = {createUser, verifyUser, sendVerificationEmail, authKeyVerif, authenticateUser, getUser, removeUser, updateUser, getAllUsers};
