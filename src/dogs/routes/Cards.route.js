@@ -1,4 +1,4 @@
-const {getCurrentDeck, getLitter, removeCardFromPack, addCardToCurrentHand} =  require("../controllers/Cards.controller");
+const {getCurrentDeck, getLitter, removeCardFromPack, addCardToCurrentHand, getOpponentInfo} =  require("../controllers/Cards.controller");
 const {sequelize} = require("../../conf/DB.conf");
 const BASE_URL = "/cards";
 
@@ -53,6 +53,14 @@ const Cards = (app) => {
         const response = await removeCardFromPack(userId, cardId);
 
         res.status(response.status).json({message: response.message});
+    });
+
+    app.post(BASE_URL + "/getopponentinfo/", async (req, res) => {
+        const {playerId} = req.body;
+
+        const response = await getOpponentInfo(playerId);
+
+        res.status(response.status).json({message: response.message, opponentInfo: response.opponentInfo, currentDeck: response.currentDeck});
     });
 }
 

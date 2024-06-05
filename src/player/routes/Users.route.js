@@ -2,6 +2,7 @@ const {verifyUser, createUser, sendVerificationEmail, authenticateUser, removeUs
     authKeyVerif
 } = require("../controllers/Users.controller");
 const cors = require("cors");
+const {sequelize} = require("../../conf/DB.conf");
 
 const BASE_PATH = '/users';
 
@@ -36,11 +37,16 @@ function UsersRoute(app) {
      * @returns {string} message - Response message
      * @returns {Object} user - User information
      **/
-    app.get(BASE_PATH + "/:id", async (req, res) => {
-        const {id} = req.params;
+    app.post(BASE_PATH + "/", async (req, res) => {
         const {authKey} = req.body;
 
-        const response = await getUser(id, authKey);
+        const token = await sequelize.models.token.findOne({where: {token: authKey}});
+        const pass = await token.getPass();
+        const user = await pass.getUser();
+        const userId = user.id;
+
+
+        const response = await getUser(userId);
 
         res.status(response.status).json({message: response.message, user: response.user});
     });

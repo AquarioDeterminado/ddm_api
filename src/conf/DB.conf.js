@@ -1,12 +1,12 @@
 const {AccountStateModel, populate: AccountStatePopulate} = require('../player/models/AccountState.model');
 const BaseModel = require('../player/models/Base.model');
-const DogModel = require('../Dogs/models/Dog.model');
+const DogModel = require('../dogs/models/Dog.model');
 const FriendRequestModel = require('../player/models/FriendRequest.model');
 const EventModel = require('../battle/models/Event.model');
 const GameEnvModel = require('../battle/models/GameEnv.model');
 const {GameStateModel} = require("../battle/models/GameState.model");
-const LitterModel = require('../Dogs/models/Litter.model');
-const PackModel = require('../Dogs/models/Pack.model');
+const LitterModel = require('../dogs/models/Litter.model');
+const PackModel = require('../dogs/models/Pack.model');
 const PassModel = require('../player/models/Pass.model');
 const PlayerModel = require('../player/models/Player.model');
 const PlayModel = require('../battle/models/Play.model');
@@ -27,99 +27,108 @@ const sequelize = new Sequelize({
     logging: false,
 });
 
-sequelize.authenticate().then(() => {
-    console.log('Connection to DB has been established successfully.');
-    makeDB().then(() => {
-        console.log('DB created');
-    }).then(() => {
+try {
 
-        console.log('All models were synchronized successfully.');
+    sequelize.authenticate().then(() => {
+        console.log('Connection to DB has been established successfully.');
+        makeDB().then(() => {
+            console.log('DB created');
+        }).then(() => {
 
-        const {
-            accountstate: AccountState,
-            base: Base,
-            dog: Dog,
-            friend_request: FriendRequest,
-            event: Event,
-            game_env: GameEnv,
-            game_state: GameState,
-            litter: Litter,
-            pack: Pack,
-            pass: Pass,
-            player: Player,
-            play: Play,
-            token: Token,
-            user: User,
-            verification_code: VerificationCode
-        } = sequelize.models
+            console.log('All models were synchronized successfully.');
 
-        User.hasMany(Player, {foreignKey: 'userId'});
-        Player.belongsTo(User, {foreignKey: 'userId'});
+            const {
+                accountstate: AccountState,
+                base: Base,
+                dog: Dog,
+                friend_request: FriendRequest,
+                event: Event,
+                game_env: GameEnv,
+                game_state: GameState,
+                litter: Litter,
+                pack: Pack,
+                pass: Pass,
+                player: Player,
+                play: Play,
+                token: Token,
+                user: User,
+                verification_code: VerificationCode
+            } = sequelize.models
 
-        User.hasOne(VerificationCode, {foreignKey: 'userId'});
-        VerificationCode.belongsTo(User, {foreignKey: 'userId'});
+            User.hasMany(Player, {foreignKey: 'userId'});
+            Player.belongsTo(User, {foreignKey: 'userId'});
 
-        AccountState.hasOne(User, {foreignKey: 'accountStateId'});
-        User.belongsTo(AccountState, {foreignKey: 'accountStateId'});
+            User.hasOne(VerificationCode, {foreignKey: 'userId'});
+            VerificationCode.belongsTo(User, {foreignKey: 'userId'});
 
-        User.hasOne(Pass, {foreignKey: 'userId'});
-        Pass.belongsTo(User, {foreignKey: 'userId'});
+            AccountState.hasOne(User, {foreignKey: 'accountStateId'});
+            User.belongsTo(AccountState, {foreignKey: 'accountStateId'});
 
-        Pass.hasMany(Token, {foreignKey: 'passId'});
-        Token.belongsTo(Pass, {foreignKey: 'passId'});
+            User.hasOne(Pass, {foreignKey: 'userId'});
+            Pass.belongsTo(User, {foreignKey: 'userId'});
 
-        FriendRequest.belongsTo(User, {foreignKey: 'senderId'});
-        User.hasOne(FriendRequest, {foreignKey: 'senderId'});
-        FriendRequest.belongsTo(User, {foreignKey: 'receiverId'});
-        User.hasOne(FriendRequest, {foreignKey: 'receiverId'});
+            Pass.hasMany(Token, {foreignKey: 'passId'});
+            Token.belongsTo(Pass, {foreignKey: 'passId'});
 
-        User.hasMany(Base, {foreignKey: 'userId'});
-        Base.belongsTo(User, {foreignKey: 'userId'});
+            FriendRequest.belongsTo(User, {foreignKey: 'senderId'});
+            User.hasOne(FriendRequest, {foreignKey: 'senderId'});
+            FriendRequest.belongsTo(User, {foreignKey: 'receiverId'});
+            User.hasOne(FriendRequest, {foreignKey: 'receiverId'});
 
-        GameEnv.belongsTo(Player, {foreignKey: 'player1Id'});
-        Player.hasMany(GameEnv, {foreignKey: 'player1Id'});
-        GameEnv.belongsTo(Player, {foreignKey: 'player2Id'});
-        Player.hasMany(GameEnv, {foreignKey: 'player2Id'});
-        GameEnv.belongsTo(Player, {foreignKey: 'playerWon'});
-        Player.hasMany(GameEnv, {foreignKey: 'playerWon'});
+            User.hasMany(Base, {foreignKey: 'userId'});
+            Base.belongsTo(User, {foreignKey: 'userId'});
 
-        GameEnv.belongsTo(Event, {foreignKey: 'eventId'});
-        Event.hasOne(GameEnv, {foreignKey: 'eventId'});
+            GameEnv.belongsTo(Player, {foreignKey: 'player1Id'});
+            Player.hasMany(GameEnv, {foreignKey: 'player1Id'});
+            GameEnv.belongsTo(Player, {foreignKey: 'player2Id'});
+            Player.hasMany(GameEnv, {foreignKey: 'player2Id'});
+            GameEnv.belongsTo(Player, {foreignKey: 'playerWon'});
+            Player.hasMany(GameEnv, {foreignKey: 'playerWon'});
 
-        GameEnv.belongsTo(GameState, {foreignKey: 'gameStateId'});
-        GameState.hasOne(GameEnv, {foreignKey: 'gameStateId'});
+            GameEnv.belongsTo(Event, {foreignKey: 'eventId'});
+            Event.hasOne(GameEnv, {foreignKey: 'eventId'});
 
+            GameEnv.belongsTo(GameState, {foreignKey: 'gameStateId'});
+            GameState.hasOne(GameEnv, {foreignKey: 'gameStateId'});
 
-        Player.hasMany(Litter, {foreignKey: 'playerId'});
-        Litter.belongsTo(Player, {foreignKey: 'playerId'});
+            Event.belongsTo(Player, {foreignKey: 'playerId'});
+            Player.hasMany(Event, {foreignKey: 'playerId'});
 
-        Dog.hasMany(Litter, { foreignKey: 'dogId'});
-        Litter.belongsTo(Dog, { foreignKey: 'dogId'});
+            Player.hasMany(Litter, {foreignKey: 'playerId'});
+            Litter.belongsTo(Player, {foreignKey: 'playerId'});
 
-        Play.belongsTo(GameEnv, {foreignKey: 'gameEnvId'});
-        GameEnv.hasMany(Play, {foreignKey: 'gameEnvId'});
+            Dog.hasMany(Litter, {foreignKey: 'dogId'});
+            Litter.belongsTo(Dog, {foreignKey: 'dogId'});
 
-        Play.belongsTo(Player, {foreignKey: 'playerId'});
-        Player.hasMany(Play, {foreignKey: 'playerId'});
+            Play.belongsTo(GameEnv, {foreignKey: 'gameEnvId'});
+            GameEnv.hasMany(Play, {foreignKey: 'gameEnvId'});
 
-        Play.belongsTo(Dog, {foreignKey: 'dogId'});
-        Dog.hasMany(Play, {foreignKey: 'dogId'});
+            Play.belongsTo(Player, {foreignKey: 'playerId'});
+            Player.hasMany(Play, {foreignKey: 'playerId'});
 
-        Pack.belongsToMany(Litter, {foreignKey: 'packId', through: 'litter_pack'});
-        Litter.belongsToMany(Pack, {foreignKey: 'litterId', through: 'litter_pack'});
+            Play.belongsTo(Dog, {foreignKey: 'dogId'});
+            Dog.hasMany(Play, {foreignKey: 'dogId'});
 
-        Pack.belongsTo(User, {foreignKey: 'userId'});
-        User.hasMany(Pack, {foreignKey: 'userId'});
+            Pack.belongsToMany(Litter, {foreignKey: 'packId', through: 'litter_pack'});
+            Litter.belongsToMany(Pack, {foreignKey: 'litterId', through: 'litter_pack'});
 
-        const force = process.env.FORCE_DB_SYNC === 'true';
-        sequelize.sync({alter: true, force: force}).then(() => {
-            console.log('All relations were synchronized successfully.');
+            Pack.belongsTo(User, {foreignKey: 'userId'});
+            User.hasMany(Pack, {foreignKey: 'userId'});
 
+            const force = process.env.FORCE_DB_SYNC === 'true';
+            sequelize.sync({alter: true, force: force}).then(() => {
+                console.log('All relations were synchronized successfully.');
+
+            }).catch((error) => {
+                console.error('Unable to sync the database:', error);
+            });
         });
+    }).catch((error) => {
+        console.error('Unable to connect to the database:', error);
     });
-}).catch((error) => {
-    console.error('Unable to connect to the database:', error);
-});
+} catch (e) {
+    console.log(e);
+}
 
 async function makeDB() {
     const AccountState = AccountStateModel(sequelize, DataTypes);

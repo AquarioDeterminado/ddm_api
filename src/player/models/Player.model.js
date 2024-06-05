@@ -22,4 +22,9 @@ module.exports = (sequelize, DataTypes) =>
             type: DataTypes.DATE,
             allowNull: true
         },
+        hp: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            default: 100
+        },
     });
