@@ -2,11 +2,11 @@ require('dotenv').config({path:__dirname+'/./../.env'});
 const express = require('express');
 const {exposeRoutes} = require("./conf/Routes.conf");
 const cors = require('cors');
+const WebSocket = require('ws');
 
 const API_URL = `localhost:${process.env.PORT}`;
 
 const app = express();
-const expressWs = require('express-ws')(app);
 
 app.use(express.json());
 app.use(cors({
@@ -21,4 +21,4 @@ app.listen(process.env.PORT, () => {
 });
 
 
-module.exports = {app, API_URL};
+module.exports = {app,API_URL};

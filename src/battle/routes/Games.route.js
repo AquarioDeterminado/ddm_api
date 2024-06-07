@@ -1,53 +1,64 @@
 const {sequelize} = require("../../conf/DB.conf");
 const BASE_PATH = "/games";
 const {getGameInfo, makeNewGame, playCard} = require("./../controllers/Game.controller");
+const {getUserIdFromAuthKey} = require("../../player/controllers/Users.controller");
+const {wss} = require("../../app");
+const WebSocket = require("ws");
+
+
 
 
 const Games = (app) => {
 
-    /**
-     *
-     **/
-    app.post(`${BASE_PATH}/currentgame/`, (req, res) => {
-        const {authKey} = req.body;
+    const wss = new WebSocket.Server({ port: 8000, path: `${BASE_PATH}/start/` });
 
-        const response = getPlayerCurrentGame(authkey);
+    console.log("Websocket server started");
+    console.log(wss);
 
-        res.status(response.status).json(response.data)
-    });
+    wss.on('connection', function connection(ws)  {
 
-    app.post(`${BASE_PATH}/makegame/`, (req, res) => {
-        const {playerId, eventId} = req.body;
+        console.log("Connection established")
 
-        const response = makeNewGame(playerId, eventId);
-
-        res.status(response.status).json(response.data)
-    });
-
-    app.post(`${BASE_PATH}/play/`, (req, res) => {
-        const {round, gameId, playerId, cardId} = req.body;
-
-        const response = playCard(round, gameId, playerId, cardId);
-
-        res.status(response.status).json(response.data)
-    });
-
-    app.ws(`${BASE_PATH}/start/`, (ws, req) => {
-
-        ws.on('message', async (msg) => {
-            const {action, info} = JSON.parse(msg);
+        ws.on('message', async function incoming(data) {
+            const {action, info} = JSON.parse(data);
             let response = {};
+            let userId, user, player
 
             switch (action) {
                 case "startGame":
-                    response = await makeNewGame(info.playerId, info.eventId);
+
+                    userId = await getUserIdFromAuthKey(info.authKey);
+                    user = await sequelize.models.user.findOne({where: {id: userId}});
+                    player = (await user.getPlayers())[0];
+
+                    response = await makeNewGame(player.id, info.eventId);
 
                     ws.send(JSON.stringify(response));
                     break;
                 case "play":
-                    response = await playCard(info.round, info.gameId, info.playerId, info.cardId);
+
+                    userId = await getUserIdFromAuthKey(info.authKey);
+                    user = await sequelize.models.user.findOne({where: {id: userId}});
+                    player = (await user.getPlayers())[0];
+
+
+                    response = await playCard(info.round, info.gameId, player.id, info.cardId);
 
                     ws.send(JSON.stringify(response));
+
+                    wss.clients.forEach(function each(client) {
+                        if (client !== ws && client.readyState === WebSocket.OPEN) {
+                            if (response.status === 200)
+                                client.send(JSON.stringify({status: 200, message:"Your Turn"}));
+                            else if (response.status === 201)
+                                client.send(JSON.stringify({status: 202, message:"You Lost"}));
+                            else if (response.status === 202)
+                                client.send(JSON.stringify({status: 201, message:"You Won"}));
+                            else if (response.status - 200  >= 0 && response.status - 200 <= 100)
+                                client.send(JSON.stringify(response));
+                        }
+                    });
+
                     break;
                 case "getGame":
                     response = await getGameInfo(info.gameId);

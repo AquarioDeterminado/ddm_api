@@ -28,7 +28,7 @@ async function makeNewGame(idPlayer1, idEvent) {
         game.setGame_state(await sequelize.models.game_state.findOne({where: {id: 1}}));
 
         await game.save();
-        return {status: 200, message: "Game created successfully", gameId: game.id};
+        return {status: 200, message: "Game started successfully", gameId: game.id};
     } catch (e) {
         console.log(e);
         return {status: 500, message: "Internal server error"};
@@ -58,7 +58,7 @@ async function playCard(round, idGame, idPlayer, cardId) {
         }
 
         if (await checkIfIsLastPlay(game, round)) {
-            return calculateRoundDamage(game, round);
+            return calculateRoundDamage(game, round, idPlayer);
         }
 
         await play.save();
@@ -71,7 +71,7 @@ async function playCard(round, idGame, idPlayer, cardId) {
     }
 }
 
-async function calculateRoundDamage(game, round) {
+async function calculateRoundDamage(game, round, playerId) {
     try {
         const plays = await game.getPlays({where: {round: round}});
         if (plays.length !== 2) return {status: 400, message: "Not enough plays to calculate damage"};
@@ -93,19 +93,26 @@ async function calculateRoundDamage(game, round) {
             await game.setDataValue('playerWon', player2.id);
             await game.setGame_state(await sequelize.models.game_state.findOne({where: {id: 3}}));
 
-            return {status: 200, message: "Player 2 won"};
+
+            if (player2.id === playerId)
+                return {status: 201, message: "You Won"};
+            else
+                return {status: 202, message: "You Lost"};
         } else if (game.player2_hp <= 0) {
             await game.setDataValue('playerWon', player1.id);
             game.setGame_state(await sequelize.models.game_state.findOne({where: {id: 3}}));
 
-            return {status: 200, message: "Player 1 won"};
+            if (player1.id === playerId)
+                return {status: 201, message: "You Won"};
+            else
+                return {status: 202, message: "You Lost"};
         } else if (game.player1_hp <= 0 && game.player2_hp <= 0) {
             game.setGame_state(await sequelize.models.game_state.findOne({where: {id: 3}}));
 
-            return {status: 200, message: "Draw"};
+            return {status: 203, message: "Draw"};
         }
 
-        return {status: 200, message: "Round finished", player1_hp: game.player1_hp, player2_hp: game.player2_hp,};
+        return {status: 204, message: "Round finished", player1_hp: game.player1_hp, player2_hp: game.player2_hp,};
     } catch (e) {
         console.log(e);
         return {status: 500, message: "Internal server error"};

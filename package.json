@@ -11,7 +11,8 @@
     "pbkdf2": "^3.1.2",
     "pg": "^8.11.3",
     "sequelize": "^6.37.1",
-    "validator": "^13.11.0"
+    "validator": "^13.11.0",
+    "ws": "^8.17.0"
   },
   "scripts": {
     "start": "node src/app.js"
