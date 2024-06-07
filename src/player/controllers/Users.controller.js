@@ -122,8 +122,26 @@ async function sendVerificationEmail(email) {
 
     const sender = "no-reply@dogdm.pt"
     const subject = "DogDM Account Verification";
-    const text = `Click the link to verify your email: ${verifPath}`;
-    const html = `<a href=${verifPath}>Click here to verify your email</a>`;
+    const text = `
+            Hi ${user.name},
+
+            Thank you for registering with DogDM! Please click the link below to verify your email address and complete your registration:
+
+            ${verifPath}
+
+            If you did not sign up for a DogDM account, please ignore this email.
+
+            Best regards,
+            The DogDM Team
+        `;
+    const html = `
+            <p>Hi ${user.name},</p>
+            <p>Thank you for registering with DogDM! Please click the link below to verify your email address and complete your registration:</p>
+            <p><a href="${verifPath}">Click here to verify your email</a></p>
+            <p>If you did not sign up for a DogDM account, please ignore this email.</p>
+            <p>Best regards,</p>
+            <p>The DogDM Team</p>
+        `;
 
     sendGrid.sendMail({
             from: sender,
