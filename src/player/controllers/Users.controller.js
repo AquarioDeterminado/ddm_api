@@ -170,7 +170,7 @@ async function createUser(userInfo) {
         try {
             newUser = await sequelize.models.user.create({email: cleanInfo.email});
             newplayer = await sequelize.models.player.create({
-                nickname: cleanInfo.nickname}
+                nickname: cleanInfo.nickname, hp: 120}
             );
             pass = await sequelize.models.pass.create({hash: cleanInfo.password.hash, salt: cleanInfo.password.salt, iterations: cleanInfo.password.iterations});
 

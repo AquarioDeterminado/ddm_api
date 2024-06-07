@@ -1,4 +1,4 @@
-const {AccountStateModel, populate: AccountStatePopulate} = require('../player/models/AccountState.model');
+const {AccountStateModel} = require('../player/models/AccountState.model');
 const BaseModel = require('../player/models/Base.model');
 const DogModel = require('../dogs/models/Dog.model');
 const FriendRequestModel = require('../player/models/FriendRequest.model');
