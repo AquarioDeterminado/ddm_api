@@ -189,7 +189,7 @@ async function createUser(userInfo) {
         try {
             newUser = await sequelize.models.user.create({email: cleanInfo.email});
             newplayer = await sequelize.models.player.create({
-                nickname: cleanInfo.nickname}
+                nickname: cleanInfo.nickname, hp: 120}
             );
             pass = await sequelize.models.pass.create({hash: cleanInfo.password.hash, salt: cleanInfo.password.salt, iterations: cleanInfo.password.iterations});
 
@@ -350,4 +350,14 @@ async function getAllUsers() {
     return {status: 200, users: await sequelize.models.user.findAll()};
 }
 
-module.exports = {createUser, verifyUser, sendVerificationEmail, authKeyVerif, authenticateUser, getUser, removeUser, updateUser, getAllUsers};
+async function getUserIdFromAuthKey(authKey) {
+    const token = await sequelize.models.token.findOne({where: {token: authKey}});
+    if (token === null)
+        return {status: 400, message: "Auth key not found"};
+    const pass = await token.getPass();
+    const user = await pass.getUser();
+    const userId = user.id;
+    return userId;
+}
+
+module.exports = {createUser, verifyUser, sendVerificationEmail, authKeyVerif, authenticateUser, getUser, removeUser, updateUser, getAllUsers, getUserIdFromAuthKey};

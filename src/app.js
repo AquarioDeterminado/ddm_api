@@ -1,8 +1,8 @@
 require('dotenv').config({path:__dirname+'/./../.env'});
-const {sequelize} =  require("./conf/DB.conf");
 const express = require('express');
 const {exposeRoutes} = require("./conf/Routes.conf");
 const cors = require('cors');
+const WebSocket = require('ws');
 
 const API_URL = `localhost:${process.env.PORT}`;
 
@@ -21,4 +21,4 @@ app.listen(process.env.PORT, () => {
 });
 
 
-module.exports = {app, API_URL};
+module.exports = {app,API_URL};
