@@ -7,6 +7,8 @@ const WebSocket = require('ws');
 const API_URL = `localhost:${process.env.PORT}`;
 
 const app = express();
+const wss = new WebSocket.Server({ port: 8000});
+
 
 app.use(express.json());
 app.use(cors({
@@ -14,11 +16,12 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
-exposeRoutes(app);
+exposeRoutes(app, wss);
+
 
 app.listen(process.env.PORT, () => {
     console.log(`Server running on port ${process.env.PORT}`);
 });
 
 
-module.exports = {app,API_URL};
+module.exports = {app, wss, API_URL};

@@ -14,6 +14,7 @@ async function makeNewGame(idPlayer1, idEvent) {
 
         if (player1 === null) return {status: 400, message: "Player not found"};
 
+
         const game = await sequelize.models.game_env.create({player1_hp: 0, player2_hp: 0, playerWon: null, round: 1});
         game.setDataValue("player1Id", player1.id);
         game.setEvent(event);
@@ -35,6 +36,14 @@ async function makeNewGame(idPlayer1, idEvent) {
     }
 }
 
+async function playersTurn(game, player, round) {
+    if (game.player1Id === player.id || game.player2Id === player.id)
+        if ((await game.getPlays({where: {playerId: player.id, round: round}})).length === 0)
+            return true;
+
+    return false;
+}
+
 async function playCard(round, idGame, idPlayer, cardId) {
     let play = null;
     try {
@@ -45,6 +54,8 @@ async function playCard(round, idGame, idPlayer, cardId) {
         if (game === null) return {status: 400, message: "Game not found"};
         if (player === null) return {status: 400, message: "Player not found"};
         if (card === null) return {status: 400, message: "Card not found"};
+
+        if (!(await playersTurn(game, player, round))) return {status: 400, message: "Not your turn"};
 
         play = await sequelize.models.play.create({round});
         await play.setGame_env(game);
@@ -81,11 +92,11 @@ async function calculateRoundDamage(game, round, playerId) {
         const card1 = await plays[0].getDog();
         const card2 = await plays[1].getDog();
 
-        const over1 = card1.hp - card2.attack;
-        const over2 = card2.hp - card1.attack;
+        const over1 = card2.attack - card1.hp;
+        const over2 = card1.attack - card2.hp;
 
-        game.player1_hp -= over1;
-        game.player2_hp -= over2;
+        over1 > 0 ? game.player1_hp -= over1 : null;
+        over2 > 0 ? game.player2_hp -= over2: null;
 
         game.save();
 
