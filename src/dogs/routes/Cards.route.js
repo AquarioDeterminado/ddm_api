@@ -6,6 +6,7 @@ const BASE_URL = "/cards";
 const Cards = (app) => {
     app.post(BASE_URL + "/currentpack/", async (req, res) => {
         const {authKey} = req.body;
+        console.log(authKey);
 
         const userId = await getUserIdFromAuthKey(authKey);
 
