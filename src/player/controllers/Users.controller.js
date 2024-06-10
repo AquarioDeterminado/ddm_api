@@ -118,7 +118,7 @@ async function sendVerificationEmail(email) {
     if (newVerifCodeRequest.status !== 200)
         return newVerifCodeRequest;
 
-    const verifPath = `http://localhost:3000/users/confirm/${newVerifCodeRequest.verifCode.code}`;
+    const verifPath = ` /${newVerifCodeRequest.verifCode.code}`;
 
     const sender = "no-reply@dogdm.pt"
     const subject = "DogDM Account Verification";
@@ -139,6 +139,7 @@ async function sendVerificationEmail(email) {
             <p>Thank you for registering with DogDM! Please click the link below to verify your email address and complete your registration:</p>
             <p><a href="${verifPath}">Click here to verify your email</a></p>
             <p>If you did not sign up for a DogDM account, please ignore this email.</p>
+            <p><a href="https://www.dogdm.pt">Click here to be redirected to the game!!</a></p>
             <p>Best regards,</p>
             <p>The DogDM Team</p>
         `;
